@@ -9,55 +9,51 @@
 #define _EEPROMALLOCATOR_H_
 
 #include <EEPROM.h>
-#ifndef EE_TEST_VAL
-#define EE_TEST_VAL 0x3159
-#endif
 
 class EEPROMallocator {
-  static unsigned int& addrCnt() {
-    static unsigned int cur = 2; // Reserve first two bytes for the first start test value
+  static uint32_t& addrCnt() {
+    static uint32_t cur = 4;  // Reserve first 4 bytes for the allocated bytes
     return cur;
   }
 
 public:
-  static void* alloc(const unsigned int sz) {
+  static void* alloc(const size_t sz) {
 #if defined(ESP8266)
     static bool inited = false;
     if(!inited) EEPROM.begin(512);
     inited = true;
 #endif
-    unsigned int &cur = addrCnt();
-    const unsigned int start = cur;
-    cur += sz;
-    if(cur > EEPROM.length()) return NULL;
+    uint32_t addr = addrCnt();
+    const uint32_t start = addr;
+    addr += sz;
+    if(addr > EEPROM.length()) return NULL;
+    addrCnt() = addr;
+    if (isFirstStart())
+      update_block(&addr, (void*)0, sizeof(addr));
     return (void*)start;
   }
 
-  static unsigned int busy() {
+  static uint32_t busy() {
     return addrCnt();
   }
-  
-  static unsigned int free() {
+
+  static uint32_t allocatedBytes() {
+    uint32_t bytes;
+    read_block(&bytes, (void*)0, sizeof(bytes));
+    return bytes;
+  }
+
+  static uint32_t free() {
     return addrCnt() >= EEPROM.length()? 0 : EEPROM.length() - addrCnt();
   }
-  
+
   static bool isFirstStart() {
-    static bool checked = false;
-    static bool firstStart = true;
-    if(checked) return firstStart;
-    checked = true;
+    return addrCnt() >= allocatedBytes();
+  }
 
-    uint16_t val;
-    if(EEPROM.length() >= sizeof(val)) {
-      read_block(&val, (void*)0, sizeof(val));
-      firstStart = val != EE_TEST_VAL;
-      if(firstStart) {
-        val = EE_TEST_VAL;
-        update_block(&val, (void*)0, sizeof(val));
-      }
-    }
-
-    return firstStart;
+  static void resetValuesOnNextBoot() {
+    uint32_t zero = 0;
+    update_block(&zero, (void*)0, sizeof(zero));
   }
 
 protected:
@@ -77,13 +73,13 @@ protected:
 
   static void read_block(void *__dst, const void *__src, size_t __n) {
     uint8_t* data = (uint8_t*)__dst;
-    int addr = (int)__src;
+    uint32_t addr = (uint32_t)__src;
     while(__n--) *data++ = EEPROM[addr++];
   }
   static void update_block(const void *__src, void *__dst, size_t __n) {
     const uint8_t* data = (const uint8_t*)__src;
-    int addr = (int)__dst;
-    while(__n--) EEPROM.write(addr++, *data++);
+    uint32_t addr = (uint32_t)__dst;
+    while(__n--) EEPROM.update(addr++, *data++);
     EEPROM.commit();
   }
 

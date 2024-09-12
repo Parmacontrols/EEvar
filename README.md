@@ -105,18 +105,7 @@ void loop() {
 #### Simulate first start
 
 If you want to reset all the saved variables in the EEPROM to their default values
-on the next CPU reset (right after you flash the sketch), 
-re-define `EE_TEST_VAL` to some different value __before__ including the library.
-
-```c++
-#define EE_TEST_VAL 0x315A    // library default is 0x3159
-#include "EEvar.h"
-
-```
-
-Try to choose "more random" values, never use something like `0xFFFF`, `0`, `1`, etc. or the first start detection may fail.
-`EEPROMallocator::isFirstStart()` will also return `true` after `EE_TEST_VAL` is re-defined.
-
+on the next CPU reset call `EEPROMallocator::resetValuesOnNextBoot()`
 
 
 ### Important notes
