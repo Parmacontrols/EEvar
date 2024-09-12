@@ -6,9 +6,9 @@
  */
 
 /*
- * There's three types available in the library: EEstore<T>, EEstring<MaxLen>, EEvar<T>. 
+ * There's three types available in the library: EEstore<T>, EEstring<MaxLen>, EEvar<T>.
  * What to choose:
- * 
+ *
  * EEstore<T> - does not create buffer of your type T. Use for:
  *    - simple types like bool, int, float.
  *    - for storing large structures, that you don't need to have in the RAM all the time, only when you access it.
@@ -19,15 +19,15 @@
  *    eeVal >> b;                   //read
  *    b = -18;
  *    eeVal << b;                   //write
- *    
+ *
  * EEstring<MaxLen> - use for storing String type. Does not buffer your string. Preserves string length, but no more than MaxLen.
  * Example:
  *    static const EEstring<20> eeVal("hello");  //create and init
  *    String a = eeVal.get();       //read
  *    String b;
  *    eeVal >> b;                   //read
- *    eeVal << "world";             //write 
- * 
+ *    eeVal << "world";             //write
+ *
  * EEvar<T> - creates buffer of your type T. Use for:
  *    - values that you read frequently.
  *    - complex structures.
@@ -43,8 +43,8 @@
  *    config.load();          //reverse changes in config
  *    config->c = 80;         //modify c in config (but not save it)
  *    config.save();          //save changes in config
- *    
- * Important notes: 
+ *
+ * Important notes:
  *    - All EEstore<T>, EEstring<MaxLen>, EEvar<T> must be global or static.
  *    - Changing order of created EEPROM variables or adding new ones not at the end will corrupt the saved data.
  *    - Type T can only be POD. E.g. T cannot be String and cannot have String as its member. Use EEstring<MaxLen> for storing a String.

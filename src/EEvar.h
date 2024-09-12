@@ -36,14 +36,14 @@ class EEstring : protected EEPROMallocator {
   const void* eeAddr;
   const uint16_t maxLen;
 public:
-  EEstring(const uint16_t maxLen, const char* initial = "") : eeAddr(alloc(maxLen)), maxLen(maxLen) { 
-    if(isFirstStart()) *this << initial; 
+  EEstring(const uint16_t maxLen, const char* initial = "") : eeAddr(alloc(maxLen)), maxLen(maxLen) {
+    if(isFirstStart()) *this << initial;
   }
   const EEstring& operator<<(const char* val) const {
     const auto len = strlen(val)+1;
     if(eeAddr) update_block((const uint8_t*)val, (void*)eeAddr, len > maxLen? maxLen : len);
     return *this;
-  }   
+  }
   const EEstring& operator<<(const String& val) const {
     return *this << val.c_str();
   }
